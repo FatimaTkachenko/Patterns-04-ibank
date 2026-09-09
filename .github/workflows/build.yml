@@ -21,22 +21,9 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Setup Chrome
-        uses: browser-actions/setup-chrome@v1
-        with:
-          chrome-version: stable
-
       - name: Start SUT for IBank
         run: |
           nohup java -jar artifacts/app-ibank.jar -P:profile=test &
-          sleep 30
 
       - name: Run IBank tests
-        run: ./gradlew test --tests "ru.netology.patterns.tests.AuthUITest" -Dselenide.headless=true
-
-      - name: Upload IBank test report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: ibank-test-report
-          path: build/reports/tests/test
+        run: ./gradlew test --info --tests "ru.netology.patterns.tests.AuthUITest" -Dselenide.headless=true

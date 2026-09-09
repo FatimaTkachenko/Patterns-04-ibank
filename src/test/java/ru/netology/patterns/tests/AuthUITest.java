@@ -1,7 +1,6 @@
 package ru.netology.patterns.tests;
 
 import com.codeborne.selenide.Condition;
-import com.codeborne.selenide.Configuration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.netology.patterns.data.RegistrationDto;
@@ -14,17 +13,12 @@ public class AuthUITest {
 
     @BeforeEach
     void setUp() {
-        Configuration.browser = System.getProperty("selenide.browser", "chrome");
-        Configuration.headless = Boolean.parseBoolean(System.getProperty("selenide.headless", "false"));
-        Configuration.browserSize = "1920x1080";
-        Configuration.timeout = 15000;
-        Configuration.holdBrowserOpen = false;
         open("http://localhost:9999");
     }
 
     @Test
     void shouldLoginWithActiveUser() {
-        RegistrationDto user = ApiGenerator.generateActiveUser();
+        RegistrationDto user = ApiGenerator.generateUser("active");
         ApiClient.registerUser(user);
 
         $("[data-test-id='login'] input")
@@ -40,7 +34,7 @@ public class AuthUITest {
 
     @Test
     void shouldNotLoginWithBlockedUser() {
-        RegistrationDto user = ApiGenerator.generateBlockedUser();
+        RegistrationDto user = ApiGenerator.generateUser("blocked");
         ApiClient.registerUser(user);
 
         $("[data-test-id='login'] input")
@@ -50,7 +44,8 @@ public class AuthUITest {
         $("[data-test-id='action-login']").click();
 
         $("[data-test-id='error-notification']")
-                .shouldBe(Condition.visible);
+                .shouldBe(Condition.visible)
+                .shouldHave(Condition.text("Пользователь заблокирован"));
     }
 
     @Test
@@ -62,12 +57,13 @@ public class AuthUITest {
         $("[data-test-id='action-login']").click();
 
         $("[data-test-id='error-notification']")
-                .shouldBe(Condition.visible);
+                .shouldBe(Condition.visible)
+                .shouldHave(Condition.text("Неверно указан логин или пароль"));
     }
 
     @Test
     void shouldNotLoginWithInvalidPassword() {
-        RegistrationDto user = ApiGenerator.generateActiveUser();
+        RegistrationDto user = ApiGenerator.generateUser("active");
         ApiClient.registerUser(user);
 
         $("[data-test-id='login'] input")
@@ -77,6 +73,7 @@ public class AuthUITest {
         $("[data-test-id='action-login']").click();
 
         $("[data-test-id='error-notification']")
-                .shouldBe(Condition.visible);
+                .shouldBe(Condition.visible)
+                .shouldHave(Condition.text("Неверно указан логин или пароль"));
     }
 }
